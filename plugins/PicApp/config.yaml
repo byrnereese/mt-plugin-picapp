@@ -6,6 +6,13 @@ version: 0.1
 object_types:
   asset.picapp: MT::Asset::PicApp
 
+options:
+  picapp_api_key:
+    label: 'API Key'
+    hint: 'Enter the API Key you received from PicApp, or <a href="http://www.picapp.com/ApiReg.aspx">apply for one now</a>.'
+    type: text
+    scope: blog
+
 applications:
   cms:
     methods:
