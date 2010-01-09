@@ -1,0 +1,59 @@
+#keywords-field {
+  float: left;
+  width: 400px;
+  margin-right: 20px;
+}
+  #keywords-field .field-content input {
+    width: 400px;
+  }
+#category-field {
+  float: left;
+  width: 100px;
+}
+  #category-field .field-content input {
+    width: 100px;
+  }
+
+#pages {
+  float: left;
+}
+#pagination {
+  float: right;
+}
+
+#progress {
+  position: absolute;
+  left: 300px;
+  top: 100px;
+}
+
+.picapp-search-results {
+  width: 100%;
+  height: 320px;
+  overflow: auto;
+  padding-top: 5px;
+}
+  .picapp-search-results .asset {
+    height: 130px;
+    width: 131px;
+    float: left;
+    padding: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+    }
+      .picapp-search-results .asset.selected {
+        background-color: #336699;
+        border-radius: 5px;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+      }
+      .picapp-search-results .asset.selected .asset-title {
+        color: #fff;
+      }
+    .picapp-search-results .asset-thumbnail {
+      height: 100px;
+      width: 130px;
+      background-repeat: no-repeat;
+      background-position: center center;
+    }

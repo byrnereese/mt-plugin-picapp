@@ -1,0 +1,212 @@
+<mt:unless name="json">
+<$mt:setvar name="screen_type" value="dialog-screen insert-asset-dialog"$>
+<mt:setvarblock name="page_title"><__trans phrase="Select an Image from PicApp"></mt:setvarblock>
+<mt:setvarblock name="html_head" append="1">
+    <link rel="stylesheet" href="<mt:var name="static_uri">plugins/PicApp/app.css" type="text/css" />
+    <script type="text/javascript" src="<mt:var name="static_uri">plugins/PicApp/app.js"></script>
+    <script type="text/javascript" src="<mt:var name="static_uri">jquery/jquery.js"></script>
+    <script type="text/javascript" src="<mt:var name="static_uri">js/tc/client.js"></script>
+    <script type="text/javascript" src="<mt:var name="static_uri">js/tc/json.js"></script>
+    <script type="text/javascript" src="<mt:var name="static_uri">js/dialog.js"></script>
+    <script type="text/javascript" src="<mt:var name="static_uri">js/assetdetail.js"></script>
+
+    <script type="text/javascript">
+    <!--
+    var picapp_url = '<$mt:var name="url_queried"$>';
+    var total_pages = '<$mt:var name="page_count"$>';
+    var current_page = 1;
+    var selected = -1;
+    var pages = new Array();
+    function init_handlers() {
+      $('.picapp-search-results .asset').click( function() {
+        var id = $(this).attr('mt:asset_id');
+        if ($(this).hasClass('selected')) {
+          $(this).removeClass('selected');
+          selected = -1;
+        } else {
+          $(this).parent().find('.selected').removeClass('selected');
+          $(this).addClass('selected');
+          selected = id;
+        }
+      });
+    }
+    $(document).ready( function() {
+      init_handlers();
+      pages[1] = $('.picapp-search-results ul').html();
+      $('a#next-page').click( function() {
+        if (current_page == total_pages) return false;
+        current_page++;
+        if (typeof pages[ current_page ] != 'undefined') {
+          $('.picapp-search-results ul').html( pages[ current_page ] );
+          return;
+        }
+        var url = '<$mt:AdminCGIPath$><$mt:AdminScript$>';
+        $('.picapp-search-results ul').html('<div id="progress"><img src="<$mt:StaticWebPath$>images/indicator.gif" width="66" height="66" /></div>');
+        $.ajax({
+          type: 'POST',
+          url: url,
+          data: {
+              '__mode'  : 'picapp_find_results',
+              'blog_id' : '<$mt:var name="blog_id"$>',
+              'kw'      : '<$mt:var name="keywords" encode_js="1"$>',
+              'category': '<$mt:var name="category" encode_js="1"$>',
+              'page'    : current_page,
+              'format'  : 'json'
+            },
+          dataType: 'json',
+          success: function(data) {
+              alert(data);
+              $('#current_page').html( current_page );
+              var str;
+              for (var i in data) {
+                var img = data[i];
+                var html = '<li mt:asset_id="'+img.id+'" id="asset-'+img.id+'" class="asset unselected"><div class="asset-thumbnail" style="background-image: url('+img.thumbnail+')"></div><div class="asset-title">'+img.title+'</div></li>';
+                str += html;
+              }
+              pages[ current_page ] = str;
+              $('.picapp-search-results ul').html(str);
+            },
+          error: function(xhr,status,error) {
+              alert('something went wrong: ' + xhr.responseText);
+            }
+        });
+      });
+      $('a#prev-page').click( function() {
+        if (current_page == 1) return false;
+        current_page--;
+        if (typeof pages[ current_page ] != 'undefined') {
+          $('.picapp-search-results ul').html( pages[ current_page ] );
+          return;
+        }
+        var url = url_for_page( current_page );
+        $('#current_page').html( current_page );
+        alert( url );
+      });
+    });
+
+    function dialogClose(data) {
+        if (!data) {
+            closeDialog();
+            return;
+        }
+        // user made a selection and clicked insert...
+        var f = document.forms['select_asset'];
+        var sel = dlg.panel.tableSelect.selected();
+        f['id'].value = sel[0].value;
+        f.submit();
+    }
+
+    function viewChange(ds, fn) {
+        checkOpened();
+        if (fn) fn(ds);
+    }
+
+    var tableSelect;
+    var dlg;
+    function init() {
+        // setup
+        // assign isModal variable which is declared in assetdetail.js:
+        isModal = getByID("list-assets-dialog");
+
+        dlg = new Dialog.Simple("list-assets");
+        var panel = new ListingPanel("asset");
+        dlg.panel = panel;
+
+        // hook into view updates so we can close any opened detail panel
+        var old_update = panel.datasource.onUpdate;
+        panel.datasource.onUpdate = function(ds) { viewChange(ds, old_update) };
+
+        panel.pager.setState(<mt:var name="pager_json">);
+        panel.parent = dlg;
+        dlg.open({}, dialogClose);
+    }
+    TC.attachLoadEvent( init );
+    // -->
+    </script>
+</mt:setvarblock>
+<mt:include name="dialog/header.tmpl">
+
+<div id="list-assets-dialog">
+    <div class="panel-header">
+    </div>
+    <div class="listing-filter">
+        <div class="listing-filter-inner inner pkg">
+          <div id="pages">
+            Viewing page <span id="current_page">1</span> of <$mt:var name="page_count"$>
+          </div>
+          <div id="pagination">
+            <a id="next-page" href="javascript:void(0)">Next</a> | 
+            <a id="prev-page" href="javascript:void(0);">Prev</a>
+          </div>
+        </div>
+    </div>
+
+    <div class="picapp-search-results">
+      <form name="search_results" 
+          method="post" 
+          action="<TMPL_VAR NAME=SCRIPT_URL>">
+        <input type="hidden" name="__mode" value="picapp_asset_options" />
+        <input type="hidden" name="blog_id" value="<$mt:var name="blog_id"$>" />
+        <input type="hidden" name="selected" value="" id="selected" />
+</mt:unless>
+<mt:if name="images_loop">
+<mt:loop name="images_loop">
+  <mt:if name="__first__"><ul></mt:if>
+      <li mt:asset_id="<$mt:var name="id"$>" id="asset-<$mt:var name="id"$>" class="asset unselected">
+        <div class="asset-thumbnail" style="background-image: url(<$mt:var name="thumbnail"$>)"></div>
+        <div class="asset-title"><$mt:var name="title"$></div>
+      </li>
+  <mt:if name="__last__"></ul></mt:if>
+</mt:loop>
+<mt:unless name="json">
+    </div> <!-- end id="search_results" -->
+
+<div class="pagination"></div>
+
+<div class="insert_button_spacing">&nbsp;</div>
+
+<div class="actions-bar">
+    <div class="actions-bar-inner pkg actions">
+            <button
+                type="submit"
+                accesskey="s"
+                title="<mt:if name="is_image"><__trans phrase="Continue (c)"><mt:else><__trans phrase="Continue (c)"></mt:if>"
+                class="primary-button close disabled-button"
+                ><mt:if name="is_image"><__trans phrase="Continue"><mt:else><__trans phrase="Continue"></mt:if></button>
+            <button
+                onclick="closeDialog(); return false"
+                type="submit"
+                accesskey="x"
+                class="cancel"
+                title="<__trans phrase="Cancel (x)">"
+                ><__trans phrase="Cancel"></button>
+    </div>
+</div>
+        </form>
+
+    </mt:unless>
+<mt:else>
+    <mtapp:statusmsg
+        id="no-assets"
+        class="info">
+        <__trans phrase="No images could be found matching those keywords.">
+    </mtapp:statusmsg>
+<div class="actions-bar">
+    <div class="actions-bar-inner pkg actions">
+        <form action="" method="get" onsubmit="return false">
+            <button
+                onclick="closeDialog(); return false"
+                type="submit"
+                accesskey="x"
+                class="cancel"
+                title="<__trans phrase="Cancel (x)">"
+                ><__trans phrase="Cancel"></button>
+        </form>
+    </div>
+</div>
+</mt:if>
+
+<mt:unless name="json">
+    </div>
+<mt:include name="dialog/footer.tmpl">
+</mt:unless>

@@ -6,6 +6,10 @@ version: 0.1
 object_types:
   asset.picapp: MT::Asset::PicApp
 
+config_settings:
+  PicAppServerURL: 
+    default: 'http://api.picapp.com/Api/ws.asmx'
+
 options:
   picapp_api_key:
     label: 'API Key'
