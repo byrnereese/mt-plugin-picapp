@@ -9,6 +9,8 @@ object_types:
 config_settings:
   PicAppServerURL: 
     default: 'http://api.picapp.com/Api/ws.asmx'
+  PicAppCachePath: 
+    default: ''
 
 options:
   picapp_api_key:

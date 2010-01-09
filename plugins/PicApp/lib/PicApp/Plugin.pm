@@ -30,8 +30,22 @@ sub find_results {
     my $plugin = MT->component('PicApp');
     my $apikey = $plugin->get_config_value('picapp_api_key','blog:'.$app->blog->id);
 
+    my $url = MT->config->PicAppServerURL;
+    my $cache_path = MT->config->PicAppCachePath;
+
+    my $cache;
+    if ($cache_path ne '') {
+        require Cache::File;
+        $cache = Cache::File->new( 
+            cache_root        => $cache_path,
+            default_expires   => '15 min',
+            );
+    }
+
     my $picapp = Net::PicApp->new({
-        apikey => $apikey
+        apikey => $apikey,
+        url => $url,
+        cache => $cache
     });
     my $response = $picapp->search($keywords, { 
         subcategory => $category,
@@ -39,8 +53,6 @@ sub find_results {
         total_records => 20,
         page => $page
     });
-
-    MT->log({ blog_id => $app->blog->id, message => "URL: " . $response->url_queried });
 
     if ($response->is_error) {
         MT->log({
@@ -60,7 +72,7 @@ sub find_results {
     }
 
     if ($format eq 'json') {
-        return MT::Util::to_json( \@images );
+        return MT::Util::to_json( { images => \@images } );
     } else {
         my $tmpl = $app->load_tmpl('dialog/find_results.tmpl');
         $tmpl->param(return_args => "__mode=find&blog_id=".$blog->id."&kw=".$keywords);

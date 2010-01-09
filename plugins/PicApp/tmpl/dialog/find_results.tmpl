@@ -33,11 +33,12 @@
     $(document).ready( function() {
       init_handlers();
       pages[1] = $('.picapp-search-results ul').html();
-      $('a#next-page').click( function() {
+      $('.picapp-search-results a#next-page').click( function() {
         if (current_page == total_pages) return false;
         current_page++;
         if (typeof pages[ current_page ] != 'undefined') {
           $('.picapp-search-results ul').html( pages[ current_page ] );
+          $('#current_page').html( current_page );
           return;
         }
         var url = '<$mt:AdminCGIPath$><$mt:AdminScript$>';
@@ -55,14 +56,12 @@
             },
           dataType: 'json',
           success: function(data) {
-              alert(data);
               $('#current_page').html( current_page );
-              var str;
-              for (var i in data) {
-                var img = data[i];
+              var str = '';              
+              $(data.images).each( function(i,img) {
                 var html = '<li mt:asset_id="'+img.id+'" id="asset-'+img.id+'" class="asset unselected"><div class="asset-thumbnail" style="background-image: url('+img.thumbnail+')"></div><div class="asset-title">'+img.title+'</div></li>';
                 str += html;
-              }
+              });
               pages[ current_page ] = str;
               $('.picapp-search-results ul').html(str);
             },
@@ -71,11 +70,12 @@
             }
         });
       });
-      $('a#prev-page').click( function() {
+      $('.picapp-search-results a#prev-page').click( function() {
         if (current_page == 1) return false;
         current_page--;
         if (typeof pages[ current_page ] != 'undefined') {
           $('.picapp-search-results ul').html( pages[ current_page ] );
+          $('#current_page').html( current_page );
           return;
         }
         var url = url_for_page( current_page );
@@ -135,8 +135,8 @@
             Viewing page <span id="current_page">1</span> of <$mt:var name="page_count"$>
           </div>
           <div id="pagination">
-            <a id="next-page" href="javascript:void(0)">Next</a> | 
-            <a id="prev-page" href="javascript:void(0);">Prev</a>
+            <a id="prev-page" href="javascript:void(0);">Prev</a> | 
+            <a id="next-page" href="javascript:void(0)">Next</a>
           </div>
         </div>
     </div>

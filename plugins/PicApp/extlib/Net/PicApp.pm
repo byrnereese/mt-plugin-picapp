@@ -11,7 +11,7 @@ $DEBUG   = 0;
 $VERSION = '0.1';
 
 use base qw(Class::Accessor);
-Net::PicApp->mk_accessors(qw(apikey url));
+Net::PicApp->mk_accessors(qw(apikey url cache));
 
 # We are exporting functions
 use base qw/Exporter/;
@@ -54,7 +54,7 @@ sub new {
     my $class  = shift;
     my $params = shift;
     my $self   = {};
-    foreach my $prop (qw/ apikey /) {
+    foreach my $prop (qw/ apikey cache /) {
         if ( exists $params->{$prop} ) {
             $self->{$prop} = $params->{$prop};
         }
@@ -69,6 +69,12 @@ sub new {
     $self->{url} = 'http://api.picapp.com/API/ws.asmx' unless $self->{url};
     bless $self, $class;
     return $self;
+}
+
+sub flush_cache {
+    my $self = shift;
+    return unless $self->cache;
+    $self->cache->clear;
 }
 
 sub search {
@@ -121,8 +127,18 @@ sub search {
         }
     }
 
-    require Net::PicApp::Response;
-    my $response = Net::PicApp::Response->new;
+    my $response;
+    if ($self->cache) {
+        $response = $self->cache->get($url);
+        if ($response) {
+            use Data::Dumper;
+            print STDERR "response: " . Dumper($response);
+            bless $response, 'Net::PicApp::Response';
+            return $response;
+        }
+    }
+
+    $response = Net::PicApp::Response->new;
     $response->url_queried($url);
 
     # Call PicApp
@@ -132,9 +148,6 @@ sub search {
     # Check the outcome of the response
     if ( $res->is_success ) {
         my $content = $res->content;
-
-        # Hack to clean results
-        #        $content =~ s/<!\[CDATA\[missing thumbnails\]\]>//gm;
         my $xml = eval { XMLin($content) };
         if ($@) {
             print STDERR "ERROR: $@\n";
@@ -147,6 +160,9 @@ sub search {
     }
     else {
         $response->error_message("Could not conduct query to: $url");
+    }
+    if ($self->cache) {
+        $self->cache->set( $url, %$response );
     }
     return $response;
 }
@@ -331,7 +347,35 @@ The API Key given to you by PicApp for accessing the service.
 
 The base URL of the PicApp service. Defaults to: 'http://api.picapp.com/API/ws.asmx'
 
+=item B<cache>
+
+A Cache object to use for caching results.
+
 =back
+
+=head1 CACHING
+
+Responses returned by Amazon's web service can be cached locally. 
+Net::Amazon's new method accepts a reference to a Cache object. 
+Cache (or one of its companions like Cache::Memory, Cache::File, 
+etc.) can be downloaded from CPAN, please check their documentation 
+for details. In fact, any other type of cache implementation 
+will do as well, see the requirements below.
+
+Here's an example utilizing a file cache which causes Net::PicApp
+to cache responses for 30 minutes:
+
+    use Cache::File;
+
+    my $cache = Cache::File->new( 
+        cache_root        => '/tmp/mycache',
+        default_expires   => '30 min',
+    );
+
+    my $picapp = Net::PicApp->new(
+        apikeykey  => 'YOUR_APIKEY',
+        cache       => $cache,
+    );
 
 =head1 SEE ALSO
 
