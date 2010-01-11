@@ -128,11 +128,52 @@ sub search {
     }
 
     my $response;
+    if ($self->cache && $self->cache->exists($url)) {
+        $response = $self->cache->thaw($url);
+        bless $response, 'Net::PicApp::Response';
+        return $response;
+    }
+
+    $response = Net::PicApp::Response->new;
+    $response->url_queried($url);
+
+    # Call PicApp
+    my $req = HTTP::Request->new( GET => $url );
+    my $res = $self->{ua}->request($req);
+
+    # Check the outcome of the response
+    if ( $res->is_success ) {
+        my $content = $res->content;
+        my $xml = eval { XMLin($content) };
+        if ($@) {
+            print STDERR "ERROR: $@\n";
+            $response->error_message("Could not parse response: $@");
+        }
+        else {
+            $response->init($xml);
+        }
+    }
+    else {
+        $response->error_message("Could not conduct query to: $url");
+    }
     if ($self->cache) {
-        $response = $self->cache->get($url);
+        $self->cache->freeze( $url, $response );
+    }
+    return $response;
+}
+
+sub get_image_details {
+    my $self = shift;
+    my ( $id ) = @_;
+    die "No image id specified" unless $id;
+
+    my $url = $self->url . "/GetImageDetails?ApiKey=" . $self->apikey;
+    $url .= '&ImageId=' . uri_escape($id);
+
+    my $response;
+    if ($self->cache) {
+        $response = $self->cache->thaw($url);
         if ($response) {
-            use Data::Dumper;
-            print STDERR "response: " . Dumper($response);
             bless $response, 'Net::PicApp::Response';
             return $response;
         }
@@ -154,17 +195,17 @@ sub search {
             $response->error_message("Could not parse response: $@");
         }
         else {
-            print STDERR "Success!\n";
             $response->init($xml);
         }
     }
     else {
         $response->error_message("Could not conduct query to: $url");
     }
-    if ($self->cache) {
-        $self->cache->set( $url, %$response );
+    if ($self->cache && $response->is_success) {
+        $self->cache->freeze( $url, $response );
     }
     return $response;
+   
 }
 
 1;

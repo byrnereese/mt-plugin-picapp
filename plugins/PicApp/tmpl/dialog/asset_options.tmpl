@@ -25,15 +25,15 @@
 </mt:if>
 
     <script type="text/javascript" src="<mt:var name="static_uri">plugins/MediaManager/js/toolbar.js"></script>
-    <div id="image-preview" class="mediamanager" style="background-image: url(<mt:var name="thumbnail" />)"></div>
+    <div id="image-preview" class="picapp" style="background-image: url(<mt:var name="thumbnail" />)"></div>
 
     <input type="hidden" id="img_url" name="img_url" />
-    <input type="hidden" id="video_id" name="video_id" value="<mt:var name="video_id">" />
+    <input type="hidden" id="image_id" name="image_id" value="<mt:var name="image_id">" />
     <input type="hidden" id="display_image" name="include" value="1" />
     <input type="hidden" name="wrap_text" value="1" />
 
     <div id="new_entry_prefs">
-      <div id="include_prefs" class="mediamanager">
+      <div id="include_prefs" class="picapp">
           <mtapp:setting
               id="alignment_var"
               label="<__trans phrase="Alignment">"
@@ -46,6 +46,22 @@
             <label class="icon-left icon-left-xwide icon-align icon-align-center"><__trans phrase="Center"></label>
             <input type="radio" name="align" id="align-right" class="rb" value="right" <mt:if name="align_right">checked="checked" </mt:if>/>
             <label class="icon-left icon-left-xwide icon-align icon-align-right"><__trans phrase="Right"></label>
+          </mtapp:setting>
+
+          <mtapp:setting
+              id="size_var"
+              label="<__trans phrase="Insert Size">"
+              label_class="top-label"
+              hint=""
+              show_hint="0">
+            <input type="radio" name="size" id="size-small" class="rb" value="234x351" <mt:if name="size_small">checked="checked" </mt:if>/>
+            <label><__trans phrase="234x351"></label>
+
+            <input type="radio" name="size" id="size-medium" class="rb" value="380x570" <mt:if name="size_small">checked="checked" </mt:if>/>
+            <label><__trans phrase="380x570"></label>
+
+            <input type="radio" name="size" id="size-large" class="rb" value="500x751" <mt:if name="size_small">checked="checked" </mt:if>/>
+            <label><__trans phrase="500x751"></label>
           </mtapp:setting>
       </div>
     </div>

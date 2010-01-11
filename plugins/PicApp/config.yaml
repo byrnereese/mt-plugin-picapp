@@ -2,6 +2,7 @@ id: PicApp
 name: 'PicApp'
 description: 'A plugin that provides integration with the PicApp image distribution platform.'
 version: 0.1
+schema_version: 1.2
 
 object_types:
   asset.picapp: MT::Asset::PicApp
@@ -31,6 +32,4 @@ applications:
         order: 303
         dialog: 'picapp_find'
         view: 'blog'
-
-
-
+        condition: $PicApp::PicApp::Plugin::uses_picapp

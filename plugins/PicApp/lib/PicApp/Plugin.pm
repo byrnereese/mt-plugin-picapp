@@ -2,6 +2,22 @@ package PicApp::Plugin;
 
 use strict;
 use Net::PicApp;
+#use MT::Util qw( encode_url );
+
+sub plugin {
+    return MT->component('PicApp');
+}
+
+sub id { 'picapp' }
+
+sub uses_picapp {
+    my $blog = MT->instance->blog;
+    return 0 if !$blog;
+    # If the user has forcibly enabled custom css, then return true.
+    my $apikey = plugin()->get_config_value('picapp_api_key','blog:'.$blog->id);
+    return 1 if $apikey;
+    return 0;
+}
 
 sub find {
     my $app = shift;
@@ -61,8 +77,9 @@ sub find_results {
                 });
     }
 
+    my @i_array = $response->images();
     my @images;
-    foreach my $i (@{$response->images}) {
+    foreach my $i (@i_array) {
         push @images, {
             id          => $i->imageId,
             title       => $i->imageTitle,
@@ -92,33 +109,74 @@ sub asset_options {
     my $app = shift;
     my $q = $app->{query};
     my $blog = $app->blog;
-    my $vid = $q->param('selected');
+    my $id = $q->param('selected');
 
-#    my $xml = _get_youtube_feed( video => $vid );
-#    my $item = XMLin($xml);
-#    use Data::Dumper;
-#    my $title = $item->{title}->{content};
-#    require MT::Asset::YouTube;
+    my $plugin = MT->component('PicApp');
+    my $apikey = $plugin->get_config_value('picapp_api_key','blog:'.$app->blog->id);
+
+    my $url = MT->config->PicAppServerURL;
+    my $cache_path = MT->config->PicAppCachePath;
+
+    my $cache;
+    if ($cache_path ne '') {
+        require Cache::File;
+        $cache = Cache::File->new( 
+            cache_root        => $cache_path,
+            default_expires   => '10 days',
+            );
+    }
+    my $picapp = Net::PicApp->new({
+        apikey => $apikey,
+        url => $url,
+        cache => $cache
+    });
+    my $response = $picapp->get_image_details($id);
+    if ($response->is_error) {
+        MT->log({
+            blog_id => $app->blog->id,
+            message => "There was an error interfacing with PicApp: " . $response->error_message
+                });
+    }
+    my $image = $response->images();
+
     my $asset = MT->model('asset.picapp')->new;
+    # TODO - look for the asset by external asset_id to see if it has already been imported
+
     $asset->blog_id($q->param('blog_id'));
-#    $asset->video_id($vid);
-#    $asset->label($title);
-#    $asset->description($item->{'media:group'}->{'media:description'}->{'content'});
-#    $asset->url($item->{'media:group'}->{'media:player'}->{url});
-#    $asset->yt_thumbnail_url($item->{'media:group'}->{'media:thumbnail'}->[0]->{url});
-#    $asset->yt_thumbnail_width($item->{'media:group'}->{'media:thumbnail'}->[0]->{width});
-#    $asset->yt_thumbnail_height($item->{'media:group'}->{'media:thumbnail'}->[0]->{height});
-#    $asset->created_by( $app->user->id );
-#    $asset->original_title($title);
+    $asset->label( $image->imageTitle );
+    $asset->description( $image->description );
+
+    $asset->url( $image->publishPageLink );
+    $asset->external_image_url( $image->urlImageFullSize );
+    $asset->image_height( $image->imageHeight );
+    $asset->image_width( $image->imageWidth );
+
+    $asset->external_id( $image->imageId );
+    $asset->external_author_id( $image->authorId );
+    $asset->external_category_id( $image->category );
+    $asset->original_title( $image->imageTitle );
+    $asset->is_color( $image->color eq 'True' ? 1 : 0 );
+    $asset->is_horizontal( $image->horizontal eq 'True' ? 1 : 0 );
+    $asset->is_vertical( $image->vertical eq 'True' ? 1 : 0 );
+    $asset->is_illustration( $image->illustration eq 'True' ? 1 : 0 );
+    $asset->is_panoramic( $image->panoramic eq 'True' ? 1 : 0 );
+    $asset->photographer_name( $image->photographerName );
+    $asset->external_thumbnail_url( $image->urlImageThumbnail );
+    $asset->thumbnail_width( $image->thumbnailWidth );
+    $asset->thumbnail_height( $image->thumbnailHeight );
+
+    $asset->created_by( $app->user->id );
 
     my $original = $asset->clone;
     $asset->save;
+
     $app->run_callbacks( 'cms_post_save.asset', $app, $asset, $original );
 
     return $app->complete_insert( 
         asset       => $asset,
         description => $asset->description,
         thumbnail   => $asset->thumbnail_url,
+#        keywords    => join(",",$image->keywords()),
         is_picapp   => 1,
     );
 }

@@ -28,6 +28,7 @@
           $(this).addClass('selected');
           selected = id;
         }
+        $('#selected').val(selected);
       });
     }
     $(document).ready( function() {
@@ -135,8 +136,8 @@
             Viewing page <span id="current_page">1</span> of <$mt:var name="page_count"$>
           </div>
           <div id="pagination">
-            <a id="prev-page" href="javascript:void(0);">Prev</a> | 
-            <a id="next-page" href="javascript:void(0)">Next</a>
+            <a id="prev-page" href="javascript:void(0);">Previous Page</a> | 
+            <a id="next-page" href="javascript:void(0)">Next Page</a>
           </div>
         </div>
     </div>
@@ -161,9 +162,16 @@
 <mt:unless name="json">
     </div> <!-- end id="search_results" -->
 
-<div class="pagination"></div>
-
 <div class="insert_button_spacing">&nbsp;</div>
+
+<div id="about_picapp">
+  <ul>
+    <li><a target="_new" href="http://blog.picapp.com/">Blog</a></li>
+    <li><a target="_new" href="http://www.picapp.com/TermsAndCondition.aspx">Terms</a></li>
+    <li><a target="_new" href="http://www.picapp.com/Contact.aspx">Contact</a></li>
+    <li><a target="_new" href="http://www.picapp.com/Faq.aspx">FAQ</a></li>
+  </ul>
+</div>
 
 <div class="actions-bar">
     <div class="actions-bar-inner pkg actions">

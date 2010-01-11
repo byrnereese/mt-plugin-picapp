@@ -27,6 +27,11 @@
   top: 100px;
 }
 
+#pagination #prev-page,
+#pagination #next-page {
+  color: white;
+}
+
 .picapp-search-results {
   width: 100%;
   height: 320px;
@@ -57,3 +62,66 @@
       background-repeat: no-repeat;
       background-position: center center;
     }
+
+/** Asset Options, Asset Preview on Insert  **/
+
+#asset_details {
+	width: 350px;
+}
+#asset_details.direct_insert {
+	min-height: 220px;
+}
+#image-preview.picapp {
+	position: absolute;
+	top: 40px;
+	right: 0px;
+	border: 1px solid #c5d3e0;
+	width: 230px;
+	height: 180px;
+	padding: 5px;
+	background-image: url();
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+
+#include_prefs.picapp .field-header {
+	width: 100px;
+	float: left;
+}
+#include_prefs.picapp .field-content {
+	width: 200px;
+	float: left;
+}
+#include_prefs.picapp .field-content select {
+	font-size: 12px;
+}
+
+#include_prefs.picapp #alignment_var-field .field-content,
+#include_prefs.picapp #size_var-field .field-content {
+  width: 300px;
+}
+  #include_prefs.picapp #alignment_var-field label,
+  #include_prefs.picapp #size_var-field label {
+    margin-right: 10px;
+  }
+
+/** About PicApp **/
+#about_picapp {
+  position: absolute;
+  bottom: 0px;
+  height: 59px; 
+  left: 10px;
+  width: 350px;
+  background-repeat: no-repeat;
+  background-position: top left;
+  background-image: url(picapp-logo-sm.png);
+}
+
+#about_picapp ul {
+  margin-left: 185px;
+  margin-top: 20px;
+}
+  #about_picapp ul li {
+    float: left;
+    margin-left: 25px;
+  }
