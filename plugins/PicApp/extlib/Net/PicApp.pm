@@ -40,7 +40,7 @@ use constant {
 # * login
 
 # Export list - to allow fine tuning of export table
-@EXPORT_OK = qw( search get_image_details login );
+@EXPORT_OK = qw( search get_image_details publish login );
 
 use strict;
 
@@ -207,7 +207,58 @@ sub get_image_details {
         $self->cache->freeze( $url, $response );
     }
     return $response;
-   
+}
+
+sub publish {
+    my $self = shift;
+    my ( $id, $term, $email, $options ) = @_;
+    die "No image id specified" unless $id;
+
+    $options ||= {};
+
+    my $url = $self->url . "/PublishImageWithSearchTerm?ApiKey=" . $self->apikey;
+    $url .= '&ImageId=' . uri_escape($id);
+    $url .= '&SearchTerm=' . uri_escape($term);
+    $url .= '&Email=' . uri_escape($email);
+    $url .= '&PicAboo=';
+    $url .= '&Trigger=';
+    $url .= '&username=&password=';
+    my $keys = {
+        'size'        => 'Size',
+        'image_frame' => 'ImageFrame',
+    };
+    foreach my $key ( keys %$keys ) {
+        $url .= '&'
+          . $keys->{$key} . '='
+          . ( $options->{$key} ? $options->{$key} : '' );
+    }
+    print STDERR "URL: $url\n";
+
+    my $response;
+    $response = Net::PicApp::Response->new;
+    $response->url_queried($url);
+
+    # Call PicApp
+    my $req = HTTP::Request->new( GET => $url );
+    my $res = $self->{ua}->request($req);
+
+    # Check the outcome of the response
+    if ( $res->is_success ) {
+        my $content = $res->content;
+        my $xml = eval { XMLin($content) };
+        if ($@) {
+            print STDERR "ERROR: $@\n";
+            $response->error_message("Could not parse response: $@");
+        }
+        else {
+            $response->init($xml);
+        }
+    }
+    else {
+        $response->error_message("Could not conduct query to: $url");
+    }
+    return $response;
+
 }
 
 1;
@@ -302,7 +353,7 @@ If C<subcategory> OR C<contributor> has been specified then this function will
 also filter the search results by image contributor (Getty, Corbis, Splash,
  etc..) and by image category (news, creative, sports, etc..)
 
-=item B<get_image_details($id)>
+=item B<get_image_details($id, $options)>
 
 This function receives the unique key and the image ID (the image ID received 
 from the search XML results). 
@@ -320,13 +371,20 @@ B<Options:>
 This function receives a login name a password and retrieves an xml with the 
 user details.
 
-=item B<publish_image_with_search_term(TODO)>
+=item B<publish( $id, $terms, $email, $options )>
 
-This function receives an email, image ID and a key and the function retrieves 
-the script in XML. Also the SearchTerm parameter should be the keyword used to 
-find the image which is published.
+This function receives an image ID, the search terms used to find the image and an email address
+and then retrieves the script in XML.
 
-TODO: options
+B<Options:>
+
+=over 4
+
+=item C<size> - 1 depicts 234, 2 depicts 350 and 3 depicts 420
+
+=item C<image_frame> - 
+
+=back
 
 =back
 

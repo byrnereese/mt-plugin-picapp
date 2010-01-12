@@ -52,19 +52,31 @@ sub thumbnail_url {
 sub as_html {
     my $asset   = shift;
     my ($param) = @_;
+
+    my $app = MT->instance;
+    $param->{enclose} = 1 if ($app->param('edit_field') =~ /^customfield/ || MT->version_number < 4.3);
+    $param->{enclose} = 0 unless exists $param->{enclose};
+
     my ($width,$height) = split("x",$param->{size});
 
-# <a href="http://view.picapp.com/default.aspx?iid=6996139&term=" target="_blank"><img src="http://cdn.picapp.com/ftp/Images/a/e/6/6/Black_Cat_ad74.JPG?adImageId=8928300&imageId=6996139" width="380" height="412"  border="0" alt="Black Cat"/></a><script type="text/javascript" src="http://cdn.pis.picapp.com/IamProd/PicAppPIS/JavaScript/PisV4.js"></script>
-# <a href="http://view.picapp.com/default.aspx?iid=681109&term=" target="_blank"><img src="http://cdn.picapp.com/ftp/Images/0/0/5/a/19.jpg?adImageId=8930104&imageId=681109" width="380" height="570"  border="0" alt="Barack Obama Visits Israel"/></a><script type="text/javascript" src="http://cdn.pis.picapp.com/IamProd/PicAppPIS/JavaScript/PisV4.js"></script>
-# <a href="http://view.picapp.com/default.aspx?iid=681109&term=" target="_blank"><img src="http://cdn.picapp.com/ftp/Images/0/0/5/a/19.jpg?adImageId=8930104&imageId=681109" width="396" height="594"  border="0" alt="Barack Obama Visits Israel"/></a><script type="text/javascript" src="http://cdn.pis.picapp.com/IamProd/PicAppPIS/JavaScript/PisV4.js"></script>
+    require Net::PicApp;
+    my $plugin = MT->component('PicApp');
+    my $apikey = $plugin->get_config_value('picapp_api_key','blog:'.$asset->blog_id);
+    my $url = MT->config->PicAppServerURL;
 
-    my $adImageId;
-    if ($param->{'size'} eq 'small') {
-        $adImageId = 8928300;
-    } elsif ($param->{'size'} eq 'small') {
-        $adImageId = 8930104;
-    } else {
-        $adImageId = 8930104;
+    my $picapp = Net::PicApp->new({
+        apikey => $apikey,
+        url => $url,
+    });
+    my $response = $picapp->publish($asset->external_id, $app->param('keywords'), $app->user->email, { 
+        size => ($width == 234 ? 1 : ($width == 350 ? 2 : 3))
+    });
+
+    if ($response->is_error) {
+        MT->log({
+            blog_id => $app->blog->id,
+            message => "There was an error interfacing with PicApp: " . $response->error_message
+                });
     }
 
     my $wrap_style = '';
@@ -85,17 +97,13 @@ sub as_html {
     }
 
     my $text = sprintf(
-        '<a href="%s" target="_blank"><img %s src="%s?adImageId=%d&imageId=%d" width="%d" height="%d"  border="0" alt="%s" /></a><script type="text/javascript" src="http://cdn.pis.picapp.com/IamProd/PicAppPIS/JavaScript/PisV4.js"></script>',
-        $asset->url,
+        '<div class="picapp-image" %s>%s</div>',
         $wrap_style,
-        $asset->external_image_url,
-        $adImageId,
-        $asset->external_id,
-        $width,
-        $height,
-        encode_html($asset->original_title),
+        $response->image_tag
         );
-    return $asset->enclose($text);
+
+    print STDERR "enclose? " . ($param->{enclose} ? "yes" : "no") . "\n";
+    return $param->{enclose} ? $asset->enclose($text) : $text;
 }
 
 sub insert_options {
@@ -107,6 +115,7 @@ sub insert_options {
     my $blog  = $asset->blog or return;
 
     $param->{thumbnail}  = $asset->thumbnail_url;
+    $param->{keywords}   = $app->{query}->param('keywords');
     $param->{image_id}   = $asset->external_id;
     $param->{align_left} = 1;
     $param->{html_head}  = '<link rel="stylesheet" href="'.$app->static_path.'plugins/PicApp/app.css" type="text/css" />';

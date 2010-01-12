@@ -40,6 +40,7 @@
       var url = '<$mt:AdminCGIPath$><$mt:AdminScript$>';
       selected = -1;
       $('.picapp-search-results ul').html('<div id="progress"><img src="<$mt:StaticWebPath$>images/indicator.gif" width="66" height="66" /></div>');
+      $('#keywords_hidden').val( $('#keywords-field input').val() );
       $.ajax({
         type: 'POST',
         url: url,
@@ -146,6 +147,7 @@
         <input type="hidden" name="__mode" value="picapp_asset_options" />
         <input type="hidden" name="blog_id" value="<$mt:var name="blog_id"$>" />
         <input type="hidden" name="selected" value="" id="selected" />
+        <input type="hidden" name="keywords" id="keywords_hidden" value="<$mt:var name="keywords"$>" />
 </mt:unless>
 <mt:if name="images_loop">
 <mt:loop name="images_loop">

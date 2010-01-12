@@ -14,12 +14,15 @@ sub new {
     my $self  = {};
     $self->{struct} = $xml;
     foreach (@FIELDS) {
-        $self->{$_} = $xml->{$_};
+        if ($xml->{$_}) {
+            $self->{$_} = $xml->{$_};
+        }
     }
     $self->{'description'} = $xml->{'imageDescription'} if $xml->{'imageDescription'};
     $self->{'category'} = $xml->{'categoryId'} if $xml->{'categoryId'};
     if ($xml->{'keyword_En_Us'}) {
-        my @kws = @{ $xml->{'keyword_En_Us'}->{'keyword'} };
+        my $keys = $xml->{'keyword_En_Us'}->{'keyword'};
+        my @kws = ref $keys eq 'ARRAY' ? @{ $keys } : ( $keys );
         $self->{'keywords'} = \@kws;
     }
     if ($xml->{'urlImageDefinedThumbnails'} && $xml->{'urlImageDefinedThumbnails'}->{'imagethumbnails'} ne 'missing thumbnails') {
@@ -27,7 +30,7 @@ sub new {
         foreach my $t (@{$xml->{'urlImageDefinedThumbnails'}->{'imagethumbnails'}}) {
             $thumbs->{ $t->{'ThumbSize'} } = $t->{'content'};
         }
-        $self->{'available_thumbnails'} = $thumbs;
+        $self->{'available_thumbnails'} = $thumbs; 
     }
     bless $self, $class;
     return $self;

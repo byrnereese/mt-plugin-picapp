@@ -189,7 +189,7 @@ sub asset_options {
         asset       => $asset,
         description => $asset->description,
         thumbnail   => $asset->thumbnail_url,
-#        keywords    => join(",",$image->keywords()),
+        keywords    => $app->{query}->param('keywords'),
         is_picapp   => 1,
     );
 }
