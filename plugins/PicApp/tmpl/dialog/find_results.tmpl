@@ -1,14 +1,10 @@
 <mt:unless name="json">
 <$mt:setvar name="screen_type" value="dialog-screen insert-asset-dialog"$>
-<mt:setvarblock name="page_title"><__trans phrase="Select an Image from PicApp"></mt:setvarblock>
+<mt:setvarblock name="page_title"><__trans phrase="Search PicApp"></mt:setvarblock>
 <mt:setvarblock name="html_head" append="1">
     <link rel="stylesheet" href="<mt:var name="static_uri">plugins/PicApp/app.css" type="text/css" />
     <script type="text/javascript" src="<mt:var name="static_uri">plugins/PicApp/app.js"></script>
     <script type="text/javascript" src="<mt:var name="static_uri">jquery/jquery.js"></script>
-    <script type="text/javascript" src="<mt:var name="static_uri">js/tc/client.js"></script>
-    <script type="text/javascript" src="<mt:var name="static_uri">js/tc/json.js"></script>
-    <script type="text/javascript" src="<mt:var name="static_uri">js/dialog.js"></script>
-    <script type="text/javascript" src="<mt:var name="static_uri">js/assetdetail.js"></script>
 
     <script type="text/javascript">
     <!--
@@ -17,6 +13,8 @@
     var current_page = 1;
     var selected = -1;
     var pages = new Array();
+    var tableSelect;
+    var dlg;
     function init_handlers() {
       $('.picapp-search-results .asset').click( function() {
         var id = $(this).attr('mt:asset_id');
@@ -28,12 +26,60 @@
           $(this).addClass('selected');
           selected = id;
         }
+        if (selected == -1) {
+          $('#continue').attr('disabled','disabled');
+          $('#continue').addClass('disabled-button');
+        } else {
+          $('#continue').removeAttr('disabled');
+          $('#continue').removeClass('disabled-button');
+        }
         $('#selected').val(selected);
+      });
+    }
+    function do_search() {
+      var url = '<$mt:AdminCGIPath$><$mt:AdminScript$>';
+      selected = -1;
+      $('.picapp-search-results ul').html('<div id="progress"><img src="<$mt:StaticWebPath$>images/indicator.gif" width="66" height="66" /></div>');
+      $.ajax({
+        type: 'POST',
+        url: url,
+        data: {
+            '__mode'     : 'picapp_find_results',
+            'blog_id'    : '<$mt:var name="blog_id"$>',
+            'kw'         : $('#keywords-field input').val(),
+            'category'   : $('#category-field input[name=category]:checked').val(),
+            'subcategory': $('#subcategory-field select').val(),
+            'page'       : current_page,
+            'format'     : 'json'
+          },
+        dataType: 'json',
+        success: function(data) {
+            picapp_url = data.url_queried;
+            total_pages = data.page_count;
+            $('#current_page').html( current_page );
+            $('#page_count').html( total_pages );
+            var str = '';              
+            $(data.images).each( function(i,img) {
+              var html = '<li mt:asset_id="'+img.id+'" id="asset-'+img.id+'" class="asset unselected"><div class="asset-thumbnail" style="background-image: url('+img.thumbnail+')"></div><div class="asset-title">'+img.title+'</div></li>';
+              str += html;
+            });
+            pages[ current_page ] = str;
+            $('.picapp-search-results ul').html(str);
+            init_handlers();
+          },
+        error: function(xhr,status,error) {
+            alert('something went wrong: ' + xhr.responseText);
+          }
       });
     }
     $(document).ready( function() {
       init_handlers();
       pages[1] = $('.picapp-search-results ul').html();
+      $('#search-box button').click( function() {
+        current_page = 1;
+        pages = new Array();
+        do_search();
+      });
       $('.picapp-search-results a#next-page').click( function() {
         if (current_page == total_pages) return false;
         current_page++;
@@ -42,34 +88,7 @@
           $('#current_page').html( current_page );
           return;
         }
-        var url = '<$mt:AdminCGIPath$><$mt:AdminScript$>';
-        $('.picapp-search-results ul').html('<div id="progress"><img src="<$mt:StaticWebPath$>images/indicator.gif" width="66" height="66" /></div>');
-        $.ajax({
-          type: 'POST',
-          url: url,
-          data: {
-              '__mode'  : 'picapp_find_results',
-              'blog_id' : '<$mt:var name="blog_id"$>',
-              'kw'      : '<$mt:var name="keywords" encode_js="1"$>',
-              'category': '<$mt:var name="category" encode_js="1"$>',
-              'page'    : current_page,
-              'format'  : 'json'
-            },
-          dataType: 'json',
-          success: function(data) {
-              $('#current_page').html( current_page );
-              var str = '';              
-              $(data.images).each( function(i,img) {
-                var html = '<li mt:asset_id="'+img.id+'" id="asset-'+img.id+'" class="asset unselected"><div class="asset-thumbnail" style="background-image: url('+img.thumbnail+')"></div><div class="asset-title">'+img.title+'</div></li>';
-                str += html;
-              });
-              pages[ current_page ] = str;
-              $('.picapp-search-results ul').html(str);
-            },
-          error: function(xhr,status,error) {
-              alert('something went wrong: ' + xhr.responseText);
-            }
-        });
+        do_search();
       });
       $('.picapp-search-results a#prev-page').click( function() {
         if (current_page == 1) return false;
@@ -79,10 +98,11 @@
           $('#current_page').html( current_page );
           return;
         }
-        var url = url_for_page( current_page );
-        $('#current_page').html( current_page );
-        alert( url );
+        do_search(); // this should never happen
       });
+      isModal = getByID("list-assets-dialog");
+      dlg = new Dialog.Simple("list-assets");
+      dlg.open({}, dialogClose);
     });
 
     function dialogClose(data) {
@@ -97,35 +117,12 @@
         f.submit();
     }
 
-    function viewChange(ds, fn) {
-        checkOpened();
-        if (fn) fn(ds);
-    }
-
-    var tableSelect;
-    var dlg;
-    function init() {
-        // setup
-        // assign isModal variable which is declared in assetdetail.js:
-        isModal = getByID("list-assets-dialog");
-
-        dlg = new Dialog.Simple("list-assets");
-        var panel = new ListingPanel("asset");
-        dlg.panel = panel;
-
-        // hook into view updates so we can close any opened detail panel
-        var old_update = panel.datasource.onUpdate;
-        panel.datasource.onUpdate = function(ds) { viewChange(ds, old_update) };
-
-        panel.pager.setState(<mt:var name="pager_json">);
-        panel.parent = dlg;
-        dlg.open({}, dialogClose);
-    }
-    TC.attachLoadEvent( init );
     // -->
     </script>
 </mt:setvarblock>
 <mt:include name="dialog/header.tmpl">
+
+    <$mt:include name="dialog/search_box.tmpl"$>
 
 <div id="list-assets-dialog">
     <div class="panel-header">
@@ -133,7 +130,7 @@
     <div class="listing-filter">
         <div class="listing-filter-inner inner pkg">
           <div id="pages">
-            Viewing page <span id="current_page">1</span> of <$mt:var name="page_count"$>
+            Viewing page <span id="current_page">1</span> of <span id="page_count"><$mt:var name="page_count"$></span>
           </div>
           <div id="pagination">
             <a id="prev-page" href="javascript:void(0);">Previous Page</a> | 
@@ -176,18 +173,20 @@
 <div class="actions-bar">
     <div class="actions-bar-inner pkg actions">
             <button
+                id="continue"
                 type="submit"
                 accesskey="s"
+                disabled="true"
                 title="<mt:if name="is_image"><__trans phrase="Continue (c)"><mt:else><__trans phrase="Continue (c)"></mt:if>"
-                class="primary-button close disabled-button"
+                class="primary-button disabled-button"
                 ><mt:if name="is_image"><__trans phrase="Continue"><mt:else><__trans phrase="Continue"></mt:if></button>
             <button
                 onclick="closeDialog(); return false"
                 type="submit"
                 accesskey="x"
-                class="cancel"
-                title="<__trans phrase="Cancel (x)">"
-                ><__trans phrase="Cancel"></button>
+                class="cancel close"
+                title="<__trans phrase="Close (x)">"
+                ><__trans phrase="Close"></button>
     </div>
 </div>
         </form>

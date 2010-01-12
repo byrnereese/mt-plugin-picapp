@@ -1,0 +1,38 @@
+  <div id="search-box" class="pkg">
+    <mtapp:setting
+        id="keywords"
+        label_class="top-label"
+        label="<__trans phrase="Keywords">"
+        hint="Enter the keywords with which to search PicApp"
+        show_hint="0">
+      <input name="kw" type="text" size="60" value="<$mt:var name="keywords"$>" />
+    </mtapp:setting>
+
+    <mtapp:setting
+        id="category"
+        label_class="top-label"
+        label="<__trans phrase="Category">">
+      <label><input id="category-creative" name="category" type="radio" value="Creative" <mt:if name="category" eq="Creative">checked="selected"</mt:if>/> Creative</label>
+      <label><input id="category-editorial" name="category" type="radio" value="Editorial" <mt:if name="category" eq="Editorial">checked="selected"</mt:if> /> Editorial</label>
+    </mtapp:setting>
+
+    <mtapp:setting
+        id="subcategory"
+        label_class="top-label"
+        label="<__trans phrase="Sub-Category">">
+      <select name="subcategory">
+        <option value="">All Editorial</option>
+        <option <mt:if name="subcategory" eq="4">selected </mt:if>value="4">Entertainment</option>
+        <option <mt:if name="subcategory" eq="5">selected </mt:if>value="5">News</option>
+        <option <mt:if name="subcategory" eq="6">selected </mt:if>value="6">Sports</option>
+      </select>
+    </mtapp:setting>
+
+    <button
+       type="submit"
+       accesskey="s"
+       title="<__trans phrase="Search (s)">"
+       class="primary-button"
+       ><__trans phrase="Search"></button>
+
+  </div>

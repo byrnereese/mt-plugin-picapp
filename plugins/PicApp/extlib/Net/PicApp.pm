@@ -100,7 +100,7 @@ sub search {
     my $url = $self->url . "/" . $method . "?ApiKey=" . $self->apikey;
     $url .= '&term=' . uri_escape($term);
     my $keys = {
-        'categories'    => 'cats',
+        'category'      => 'cats',
         'colors'        => 'clrs',
         'orientation'   => 'oris',
         'types'         => 'types',
@@ -128,7 +128,7 @@ sub search {
     }
 
     my $response;
-    if ($self->cache && $self->cache->exists($url)) {
+    if (!$options->{no_cache} && $self->cache && $self->cache->exists($url)) {
         $response = $self->cache->thaw($url);
         bless $response, 'Net::PicApp::Response';
         return $response;
@@ -156,7 +156,7 @@ sub search {
     else {
         $response->error_message("Could not conduct query to: $url");
     }
-    if ($self->cache) {
+    if (!$options->{no_cache} && $self->cache && $response->is_success) {
         $self->cache->freeze( $url, $response );
     }
     return $response;
@@ -164,14 +164,16 @@ sub search {
 
 sub get_image_details {
     my $self = shift;
-    my ( $id ) = @_;
+    my ( $id, $options ) = @_;
     die "No image id specified" unless $id;
+
+    $options ||= {};
 
     my $url = $self->url . "/GetImageDetails?ApiKey=" . $self->apikey;
     $url .= '&ImageId=' . uri_escape($id);
 
     my $response;
-    if ($self->cache) {
+    if (!$options->{no_cache} && $self->cache) {
         $response = $self->cache->thaw($url);
         if ($response) {
             bless $response, 'Net::PicApp::Response';
@@ -201,7 +203,7 @@ sub get_image_details {
     else {
         $response->error_message("Could not conduct query to: $url");
     }
-    if ($self->cache && $response->is_success) {
+    if (!$options->{no_cache} && $self->cache && $response->is_success) {
         $self->cache->freeze( $url, $response );
     }
     return $response;
@@ -263,9 +265,11 @@ B<Search Options:>
 
 =over 4
 
+=item C<no_cache> - if set to true, then the cache will be forcibly bypassed for this one request
+
 =item C<with_thumbnails> - boolean
 
-=item C<categories> - "Editorial" or "Creative" (default: all)
+=item C<category> - "Editorial" or "Creative" (default: all)
 
 =item C<subcategory> - A sub-category by which to filter. See Constants.
 
@@ -302,6 +306,14 @@ also filter the search results by image contributor (Getty, Corbis, Splash,
 
 This function receives the unique key and the image ID (the image ID received 
 from the search XML results). 
+
+B<Options:>
+
+=over 4
+
+=item C<no_cache> - if set to true, then the cache will be forcibly bypassed for this one request
+
+=back
 
 =item B<does_user_exist($username, $password)>
 

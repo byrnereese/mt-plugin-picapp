@@ -23,13 +23,12 @@ options:
 applications:
   cms:
     methods:
-      picapp_find: $PicApp::PicApp::Plugin::find
       picapp_find_results: $PicApp::PicApp::Plugin::find_results
       picapp_asset_options: $PicApp::PicApp::Plugin::asset_options
     menus:
       create:picapp:
         label: 'PicApp Asset'
         order: 303
-        dialog: 'picapp_find'
+        dialog: 'picapp_find_results'
         view: 'blog'
         condition: $PicApp::PicApp::Plugin::uses_picapp

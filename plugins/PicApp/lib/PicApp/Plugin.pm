@@ -2,7 +2,7 @@ package PicApp::Plugin;
 
 use strict;
 use Net::PicApp;
-#use MT::Util qw( encode_url );
+use MT::Util qw( decode_url encode_url );
 
 sub plugin {
     return MT->component('PicApp');
@@ -19,26 +19,34 @@ sub uses_picapp {
     return 0;
 }
 
-sub find {
-    my $app = shift;
-    my $q = $app->{query};
-    my $blog = $app->blog;
-    my $tmpl = $app->load_tmpl('dialog/find.tmpl');
-    $tmpl->param(blog_id      => $blog->id);
-    return $app->build_page($tmpl);
-}
-
 sub find_results {
     my $app = shift;
 
     my $q = $app->{query};
     my $blog = $app->blog;
 
-    my $blog_id  = $q->param('blog_id');
-    my $keywords = $q->param('kw');
-    my $category = $q->param('category') || 1;
-    my $page     = $q->param('page') || 1;
-    my $format   = $q->param('format') || 1;
+    my ($keywords,$category,$subcategory);
+    if ($q->param('kw')) {
+        $keywords    = $q->param('kw');
+        $category    = $q->param('category') || 'Editorial';
+        $subcategory = $q->param('subcategory');
+    } else {
+        my $c = $app->cookie_val('mt_picapp') || '';
+        ($keywords,$category,$subcategory) = ($c =~ /^kw=([^\&]*)&c=([^\&]*)&s=(.*)$/) if $c;
+        $keywords ||= '*';
+        $keywords = decode_url($keywords);
+        $category ||= 'Editorial';
+    }
+
+    my $blog_id     = $q->param('blog_id');
+    my $page        = $q->param('page') || 1;
+    my $format      = $q->param('format') || 1;
+
+    my %cookie1 = (
+        -name  => 'mt_picapp',
+        -value => "kw=".encode_url($keywords)."&c=".$category."&s=".$subcategory,
+        );
+    $app->bake_cookie(%cookie1);
 
     my $limit = 10;
     my $offset = $limit * ($page - 1);
@@ -64,7 +72,8 @@ sub find_results {
         cache => $cache
     });
     my $response = $picapp->search($keywords, { 
-        subcategory => $category,
+        category => $category,
+        subcategory => $subcategory,
         with_thumbnails => 1,
         total_records => 20,
         page => $page
@@ -89,7 +98,11 @@ sub find_results {
     }
 
     if ($format eq 'json') {
-        return MT::Util::to_json( { images => \@images } );
+        return MT::Util::to_json({ 
+            images => \@images,
+            page_count => int($response->total_records / 20),
+            url_queried => $response->url_queried,
+        });
     } else {
         my $tmpl = $app->load_tmpl('dialog/find_results.tmpl');
         $tmpl->param(return_args => "__mode=find&blog_id=".$blog->id."&kw=".$keywords);

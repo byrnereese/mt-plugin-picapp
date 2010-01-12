@@ -34,7 +34,7 @@ sub init {
         # Its a search
         $self->total_records( $xml->{totalRecords} );
         $self->rss_link( $xml->{rssLink} );
-        my @infos = @{ $xml->{ImageInfo} };
+        my @infos = $xml->{ImageInfo} ? @{ $xml->{ImageInfo} } : ();
         my @images;
         foreach (@infos) {
             push @images, Net::PicApp::Image->new($_);
