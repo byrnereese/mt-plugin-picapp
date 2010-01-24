@@ -50,6 +50,12 @@ sub urlImageThumbnail {
     return $self->{struct}->{urlImageThumnail};
 }
 
+sub thumbnail_by_size {
+    my $self = shift;
+    my ($size) = @_;
+    return $self->{'available_thumbnails'}->{$size};
+}
+
 sub thumbnails {
     my $self = shift;
     my @thumbs;

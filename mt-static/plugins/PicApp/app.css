@@ -1,3 +1,7 @@
+#editor-content .editor-toolbar .picapp {
+  background-image: url('picapp-icon.gif');
+}
+
 #keywords-field {
   float: left;
   width: 205px;
@@ -72,6 +76,9 @@
   overflow: auto;
   padding-top: 5px;
 }
+  #no-assets {
+#    display: none;
+  }
   .picapp-search-results .asset {
     height: 130px;
     width: 131px;
@@ -80,6 +87,7 @@
     margin-right: 5px;
     margin-bottom: 5px;
     text-align: center;
+    font-size: 10px;
     }
       .picapp-search-results .asset.selected {
         background-color: #336699;
@@ -91,10 +99,6 @@
         color: #fff;
       }
     .picapp-search-results .asset-thumbnail {
-      height: 100px;
-      width: 130px;
-      background-repeat: no-repeat;
-      background-position: center center;
     }
 
 /** Asset Options, Asset Preview on Insert  **/
@@ -142,7 +146,7 @@
 /** About PicApp **/
 #about_picapp {
   position: absolute;
-  bottom: 0px;
+  bottom: -5px;
   height: 59px; 
   left: 10px;
   width: 350px;
@@ -153,9 +157,10 @@
 
 #about_picapp ul {
   margin-left: 185px;
-  margin-top: 20px;
+  margin-top: 32px;
+  width: 230px;
 }
   #about_picapp ul li {
     float: left;
-    margin-left: 25px;
+    margin-left: 15px;
   }

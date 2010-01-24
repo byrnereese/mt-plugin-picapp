@@ -118,6 +118,7 @@ sub insert_options {
     $param->{keywords}   = $app->{query}->param('keywords');
     $param->{image_id}   = $asset->external_id;
     $param->{align_left} = 1;
+    $param->{size_large} = 1;
     $param->{html_head}  = '<link rel="stylesheet" href="'.$app->static_path.'plugins/PicApp/app.css" type="text/css" />';
 
     return $app->build_page( '../plugins/PicApp/tmpl/dialog/asset_options.tmpl', $param );

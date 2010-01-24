@@ -32,3 +32,8 @@ applications:
         dialog: 'picapp_find_results'
         view: 'blog'
         condition: $PicApp::PicApp::Plugin::uses_picapp
+
+callbacks:
+  MT::App::CMS::template_source.archetype_editor: $PicApp::PicApp::Plugin::xfrm_editor
+  MT::App::CMS::template_source.edit_entry:       $PicApp::PicApp::Plugin::xfrm_edit
+

@@ -19,6 +19,24 @@ sub uses_picapp {
     return 0;
 }
 
+sub xfrm_edit {
+    my ($cb, $app, $tmpl) = @_;
+    return 1 unless uses_picapp();
+    my $slug1 = <<END_TMPL;
+<link rel="stylesheet" href="<mt:StaticWebPath>plugins/PicApp/app.css" type="text/css" />
+END_TMPL
+    $$tmpl =~ s{(<mt:setvarblock name="html_head" append="1">)}{$1$slug1}msg;
+}
+
+sub xfrm_editor {
+    my ($cb, $app, $tmpl) = @_;
+    return 1 unless uses_picapp();
+    my $slug2 = <<END_TMPL;
+<a href="javascript: void 0;" title="<__trans phrase="Insert PicApp Image" escape="html">" mt:command="open-dialog" mt:dialog-params="__mode=picapp_find_results&amp;edit_field=<mt:var name="toolbar_edit_field">&amp;blog_id=<mt:var name="blog_id">&amp;from_editor=1" class="command-insert-picapp toolbar button picapp"><b>Insert PicApp Image</b><s></s></a>
+END_TMPL
+    $$tmpl =~ s{(<b>Insert Image</b><s></s></a>)}{$1$slug2}msg;
+}
+
 sub find_results {
     my $app = shift;
 
@@ -93,7 +111,9 @@ sub find_results {
             id          => $i->imageId,
             title       => $i->imageTitle,
             description => $i->description,
-            thumbnail   => $i->urlImageThumbnail,
+            thumbnail   => $i->thumbnail_by_size(120),
+            caption     => $i->description,
+            date        => $i->imageDate
         };
     }
 
@@ -101,12 +121,13 @@ sub find_results {
         return MT::Util::to_json({ 
             images => \@images,
             page_count => int($response->total_records / 20),
+            total_results => $response->total_records || 0,
             url_queried => $response->url_queried,
         });
     } else {
         my $tmpl = $app->load_tmpl('dialog/find_results.tmpl');
         $tmpl->param(return_args => "__mode=find&blog_id=".$blog->id."&kw=".$keywords);
-        $tmpl->param(total_results => $response->total_records);
+        $tmpl->param(total_results => $response->total_records || 0);
         $tmpl->param(page_count => int($response->total_records / 20));
         $tmpl->param(url_queried => $response->url_queried);
         $tmpl->param(blog_id => $blog->id);
@@ -114,6 +135,8 @@ sub find_results {
         $tmpl->param(images_loop => \@images);
         $tmpl->param(keywords => $keywords);
         $tmpl->param(category => $category);
+        $tmpl->param(from_editor  => $q->param('from_editor') );
+
         return $app->build_page($tmpl);
     }
 }
@@ -190,6 +213,7 @@ sub asset_options {
         description => $asset->description,
         thumbnail   => $asset->thumbnail_url,
         keywords    => $app->{query}->param('keywords'),
+        size_large  => 1,
         is_picapp   => 1,
     );
 }

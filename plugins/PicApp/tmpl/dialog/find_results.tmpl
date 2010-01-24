@@ -3,6 +3,7 @@
 <mt:setvarblock name="page_title"><__trans phrase="Search PicApp"></mt:setvarblock>
 <mt:setvarblock name="html_head" append="1">
     <link rel="stylesheet" href="<mt:var name="static_uri">plugins/PicApp/app.css" type="text/css" />
+    <script type="text/javascript" src="<mt:var name="static_uri">js/dialog.js"></script>
     <script type="text/javascript" src="<mt:var name="static_uri">plugins/PicApp/app.js"></script>
     <script type="text/javascript" src="<mt:var name="static_uri">jquery/jquery.js"></script>
 
@@ -37,6 +38,7 @@
       });
     }
     function do_search() {
+      $('#no-assets').hide();
       var url = '<$mt:AdminCGIPath$><$mt:AdminScript$>';
       selected = -1;
       $('.picapp-search-results ul').html('<div id="progress"><img src="<$mt:StaticWebPath$>images/indicator.gif" width="66" height="66" /></div>');
@@ -60,13 +62,20 @@
             $('#current_page').html( current_page );
             $('#page_count').html( total_pages );
             var str = '';              
-            $(data.images).each( function(i,img) {
-              var html = '<li mt:asset_id="'+img.id+'" id="asset-'+img.id+'" class="asset unselected"><div class="asset-thumbnail" style="background-image: url('+img.thumbnail+')"></div><div class="asset-title">'+img.title+'</div></li>';
-              str += html;
-            });
-            pages[ current_page ] = str;
-            $('.picapp-search-results ul').html(str);
-            init_handlers();
+            if (data.total_results == 0) {
+              $('#no-assets').removeClass('hidden').show();
+              $('.picapp-search-results').hide();
+            } else {
+              $('#no-assets').hide();
+              $('.picapp-search-results').show();
+              $(data.images).each( function(i,img) {
+                var html = '<li mt:asset_id="'+img.id+'" id="asset-'+img.id+'" class="asset unselected"><img class="asset-thumbnail" src="'+img.thumbnail+'" title="'+img.caption+'" /><div class="asset-title">'+img.title+'</div></li>';
+                str += html;
+              });
+              pages[ current_page ] = str;
+              $('.picapp-search-results ul').html(str);
+              init_handlers();
+            }
           },
         error: function(xhr,status,error) {
             alert('something went wrong: ' + xhr.responseText);
@@ -76,12 +85,26 @@
     $(document).ready( function() {
       init_handlers();
       pages[1] = $('.picapp-search-results ul').html();
+      $('#search-box input').bind('keypress', function(e) {
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if(code == 13) { 
+          do_search();
+        }
+      });
+      $('#category-field input').click( function() {
+        var sel = $(this).val();
+        if (sel == 'Creative') {
+          $('#subcategory-field').hide();
+        } else {
+          $('#subcategory-field').show();
+        }
+      });
       $('#search-box button').click( function() {
         current_page = 1;
         pages = new Array();
         do_search();
       });
-      $('.picapp-search-results a#next-page').click( function() {
+      $('#pagination a#next-page').click( function() {
         if (current_page == total_pages) return false;
         current_page++;
         if (typeof pages[ current_page ] != 'undefined') {
@@ -91,7 +114,7 @@
         }
         do_search();
       });
-      $('.picapp-search-results a#prev-page').click( function() {
+      $('#pagination a#prev-page').click( function() {
         if (current_page == 1) return false;
         current_page--;
         if (typeof pages[ current_page ] != 'undefined') {
@@ -139,6 +162,12 @@
           </div>
         </div>
     </div>
+    <mt:setvarblock name="msg_class">info <mt:if name="total_results" gt="0">hidden</mt:if></mt:setvarblock>
+    <mtapp:statusmsg
+        id="no-assets"
+        class="$msg_class">
+        <__trans phrase="No images could be found matching those keywords.">
+    </mtapp:statusmsg>
 
     <div class="picapp-search-results">
       <form name="search_results" 
@@ -148,16 +177,21 @@
         <input type="hidden" name="blog_id" value="<$mt:var name="blog_id"$>" />
         <input type="hidden" name="selected" value="" id="selected" />
         <input type="hidden" name="keywords" id="keywords_hidden" value="<$mt:var name="keywords"$>" />
+
+      <mt:if name="from_editor">
+        <input type="hidden" name="entry_insert" value="1" />
+      <mt:else>
+      </mt:if>
+
 </mt:unless>
-<mt:if name="images_loop">
+<ul>
 <mt:loop name="images_loop">
-  <mt:if name="__first__"><ul></mt:if>
       <li mt:asset_id="<$mt:var name="id"$>" id="asset-<$mt:var name="id"$>" class="asset unselected">
-        <div class="asset-thumbnail" style="background-image: url(<$mt:var name="thumbnail"$>)"></div>
+        <img class="asset-thumbnail" src="<$mt:var name="thumbnail"$>" title="<$mt:var name="caption" encode_html="1"$> - Click to select" />
         <div class="asset-title"><$mt:var name="title"$></div>
       </li>
-  <mt:if name="__last__"></ul></mt:if>
 </mt:loop>
+</ul>
 <mt:unless name="json">
     </div> <!-- end id="search_results" -->
 
@@ -194,26 +228,6 @@
         </form>
 
     </mt:unless>
-<mt:else>
-    <mtapp:statusmsg
-        id="no-assets"
-        class="info">
-        <__trans phrase="No images could be found matching those keywords.">
-    </mtapp:statusmsg>
-<div class="actions-bar">
-    <div class="actions-bar-inner pkg actions">
-        <form action="" method="get" onsubmit="return false">
-            <button
-                onclick="closeDialog(); return false"
-                type="submit"
-                accesskey="x"
-                class="cancel"
-                title="<__trans phrase="Cancel (x)">"
-                ><__trans phrase="Cancel"></button>
-        </form>
-    </div>
-</div>
-</mt:if>
 
 <mt:unless name="json">
     </div>

@@ -21,6 +21,7 @@
       <mt:var name="tags" escape="html" />
     </mtapp:setting>
 </mt:ignore>
+       </div>
     </div>
 </mt:if>
 
@@ -33,6 +34,17 @@
     <input type="hidden" name="wrap_text" value="1" />
 
     <div id="new_entry_prefs">
+<mtapp:setting
+    id="display_image"
+    label="<__trans phrase="Display image in entry">"
+    label_class="no-header"
+    hint=""
+    show_hint="0"
+    help_page=""
+    help_section="">
+    <input type="checkbox" name="include" id="display_image" value="1" checked="checked" onclick="toggleSubPrefs(this); return true;" />
+    <label for="display_image"><__trans phrase="Display image in entry"></label>
+</mtapp:setting>
       <div id="include_prefs" class="picapp">
           <mtapp:setting
               id="alignment_var"
@@ -57,10 +69,10 @@
             <input type="radio" name="size" id="size-small" class="rb" value="234x351" <mt:if name="size_small">checked="checked" </mt:if>/>
             <label><__trans phrase="234x351"></label>
 
-            <input type="radio" name="size" id="size-medium" class="rb" value="380x570" <mt:if name="size_small">checked="checked" </mt:if>/>
+            <input type="radio" name="size" id="size-medium" class="rb" value="380x570" <mt:if name="size_medium">checked="checked" </mt:if>/>
             <label><__trans phrase="380x570"></label>
 
-            <input type="radio" name="size" id="size-large" class="rb" value="500x751" <mt:if name="size_small">checked="checked" </mt:if>/>
+            <input type="radio" name="size" id="size-large" class="rb" value="500x751" <mt:if name="size_large">checked="checked" </mt:if>/>
             <label><__trans phrase="500x751"></label>
           </mtapp:setting>
       </div>
