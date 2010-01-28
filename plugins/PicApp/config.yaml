@@ -1,7 +1,7 @@
 id: PicApp
 name: 'PicApp'
 description: 'A plugin that provides integration with the PicApp image distribution platform.'
-version: 0.9
+version: 0.9.2
 schema_version: 1.2
 
 object_types:
@@ -12,13 +12,8 @@ config_settings:
     default: 'http://api.picapp.com/Api/ws.asmx'
   PicAppCachePath: 
     default: ''
-
-options:
-  picapp_api_key:
-    label: 'API Key'
-    hint: 'Enter the API Key you received from PicApp, or <a href="http://www.picapp.com/ApiReg.aspx">apply for one now</a>.'
-    type: text
-    scope: blog
+  PicAppAPIKey: 
+    default: '5d6c591b-d3fc-41c2-a7b1-639abc89d460'
 
 applications:
   cms:
@@ -36,4 +31,5 @@ applications:
 callbacks:
   MT::App::CMS::template_source.archetype_editor: $PicApp::PicApp::Plugin::xfrm_editor
   MT::App::CMS::template_source.edit_entry:       $PicApp::PicApp::Plugin::xfrm_edit
+  MT::App::CMS::template_source.asset_options:    $PicApp::PicApp::Plugin::xfrm_asset_options
 

@@ -80,7 +80,7 @@
 #    display: none;
   }
   .picapp-search-results .asset {
-    height: 130px;
+    height: 145px;
     width: 131px;
     float: left;
     padding: 5px;
@@ -95,11 +95,15 @@
         -moz-border-radius: 5px;
         -webkit-border-radius: 5px;
       }
+      .picapp-search-results .asset:hover {
+        cursor:pointer;
+      }
       .picapp-search-results .asset.selected .asset-title {
         color: #fff;
       }
-    .picapp-search-results .asset-thumbnail {
-    }
+      .picapp-search-results .asset-thumbnail {
+        width: 120px; height: 120px;
+      }
 
 /** Asset Options, Asset Preview on Insert  **/
 
@@ -145,6 +149,7 @@
 
 /** About PicApp **/
 #about_picapp {
+  z-index: 100;
   position: absolute;
   bottom: -5px;
   height: 59px; 
@@ -152,9 +157,13 @@
   width: 350px;
   background-repeat: no-repeat;
   background-position: top left;
-  background-image: url(picapp-logo-sm.png);
+/*  background-image: url(picapp-logo-sm.png);*/
 }
-
+#about_picapp img {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 #about_picapp ul {
   margin-left: 185px;
   margin-top: 32px;

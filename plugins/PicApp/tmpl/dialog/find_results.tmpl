@@ -64,9 +64,13 @@
             var str = '';              
             if (data.total_results == 0) {
               $('#no-assets').removeClass('hidden').show();
+              $('#page_count').html( "0" );
+              $('#current_page').html( "0" );
+              $('#pagination').hide();
               $('.picapp-search-results').hide();
             } else {
               $('#no-assets').hide();
+              $('#pagination').show();
               $('.picapp-search-results').show();
               $(data.images).each( function(i,img) {
                 var html = '<li mt:asset_id="'+img.id+'" id="asset-'+img.id+'" class="asset unselected"><img class="asset-thumbnail" src="'+img.thumbnail+'" title="'+img.caption+'" /><div class="asset-title">'+img.title+'</div></li>';
@@ -78,7 +82,7 @@
             }
           },
         error: function(xhr,status,error) {
-            alert('something went wrong: ' + xhr.responseText);
+            alert('PicApp Plugin: our apologies, but it appears that something went wrong: ' + error);
           }
       });
     }
@@ -110,6 +114,7 @@
         if (typeof pages[ current_page ] != 'undefined') {
           $('.picapp-search-results ul').html( pages[ current_page ] );
           $('#current_page').html( current_page );
+          init_handlers();
           return;
         }
         do_search();
@@ -120,6 +125,7 @@
         if (typeof pages[ current_page ] != 'undefined') {
           $('.picapp-search-results ul').html( pages[ current_page ] );
           $('#current_page').html( current_page );
+          init_handlers();
           return;
         }
         do_search(); // this should never happen
@@ -154,7 +160,7 @@
     <div class="listing-filter">
         <div class="listing-filter-inner inner pkg">
           <div id="pages">
-            Viewing page <span id="current_page">1</span> of <span id="page_count"><$mt:var name="page_count"$></span>
+            Viewing page <span id="current_page"><mt:if name="total_results" gt="0">1<mt:else>0</mt:if></span> of <span id="page_count"><$mt:var name="page_count"$></span>
           </div>
           <div id="pagination">
             <a id="prev-page" href="javascript:void(0);">Previous Page</a> | 
@@ -198,6 +204,7 @@
 <div class="insert_button_spacing">&nbsp;</div>
 
 <div id="about_picapp">
+  <a href="http://www.picapp.com/"><img src="<$mt:StaticWebPath$>plugins/PicApp/picapp-logo-sm.png" width="174" height="59" /></a>
   <ul>
     <li><a target="_new" href="http://blog.picapp.com/">Blog</a></li>
     <li><a target="_new" href="http://www.picapp.com/TermsAndCondition.aspx">Terms</a></li>

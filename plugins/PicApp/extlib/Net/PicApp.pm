@@ -144,9 +144,12 @@ sub search {
     # Check the outcome of the response
     if ( $res->is_success ) {
         my $content = $res->content;
+        open FILE, ">/Users/breese/Sites/logs/picapp.xml";
+        print FILE $content;
+        close FILE;
         my $xml = eval { XMLin($content) };
         if ($@) {
-            print STDERR "ERROR: $@\n";
+            print STDERR "XML PARSING ERROR: $@\n";
             $response->error_message("Could not parse response: $@");
         }
         else {
@@ -156,7 +159,7 @@ sub search {
     else {
         $response->error_message("Could not conduct query to: $url");
     }
-    if (!$options->{no_cache} && $self->cache && $response->is_success) {
+    if (!$options->{no_cache} && $self->cache && $response->is_success && $response->total_records > 0) {
         $self->cache->freeze( $url, $response );
     }
     return $response;
@@ -193,7 +196,7 @@ sub get_image_details {
         my $content = $res->content;
         my $xml = eval { XMLin($content) };
         if ($@) {
-            print STDERR "ERROR: $@\n";
+            print STDERR "XML PARSING ERROR: $@\n";
             $response->error_message("Could not parse response: $@");
         }
         else {
@@ -232,7 +235,6 @@ sub publish {
           . $keys->{$key} . '='
           . ( $options->{$key} ? $options->{$key} : '' );
     }
-    print STDERR "URL: $url\n";
 
     my $response;
     $response = Net::PicApp::Response->new;
@@ -247,7 +249,7 @@ sub publish {
         my $content = $res->content;
         my $xml = eval { XMLin($content) };
         if ($@) {
-            print STDERR "ERROR: $@\n";
+            print STDERR "XML PARSING ERROR: $@\n";
             $response->error_message("Could not parse response: $@");
         }
         else {

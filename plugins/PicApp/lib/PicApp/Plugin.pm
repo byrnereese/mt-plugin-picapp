@@ -14,7 +14,7 @@ sub uses_picapp {
     my $blog = MT->instance->blog;
     return 0 if !$blog;
     # If the user has forcibly enabled custom css, then return true.
-    my $apikey = plugin()->get_config_value('picapp_api_key','blog:'.$blog->id);
+    my $apikey = MT->config->PicAppAPIKey;
     return 1 if $apikey;
     return 0;
 }
@@ -35,6 +35,15 @@ sub xfrm_editor {
 <a href="javascript: void 0;" title="<__trans phrase="Insert PicApp Image" escape="html">" mt:command="open-dialog" mt:dialog-params="__mode=picapp_find_results&amp;edit_field=<mt:var name="toolbar_edit_field">&amp;blog_id=<mt:var name="blog_id">&amp;from_editor=1" class="command-insert-picapp toolbar button picapp"><b>Insert PicApp Image</b><s></s></a>
 END_TMPL
     $$tmpl =~ s{(<b>Insert Image</b><s></s></a>)}{$1$slug2}msg;
+}
+
+sub xfrm_asset_options {
+    my ($cb, $app, $tmpl) = @_;
+    return unless $app->param('is_picapp');
+    $$tmpl =~ s{<textarea name="description" id="file_desc" cols="" rows="" class="full-width short"></textarea>}{<textarea name="description" id="file_desc" cols="" rows="" class="full-width short"><mt:var name="description"></textarea>}msg;
+    $$tmpl =~ s{File Options}{Image Options}msg;
+    $$tmpl =~ s{id="file_name"}{id="file_name" disabled="disabled"}msg;
+    $$tmpl =~ s{id="file_desc"}{id="file_desc" disabled="disabled"}msg;
 }
 
 sub find_results {
@@ -69,10 +78,9 @@ sub find_results {
     my $limit = 10;
     my $offset = $limit * ($page - 1);
 
-    my $plugin = MT->component('PicApp');
-    my $apikey = $plugin->get_config_value('picapp_api_key','blog:'.$app->blog->id);
-
-    my $url = MT->config->PicAppServerURL;
+    my $plugin     = MT->component('PicApp');
+    my $apikey     = MT->config->PicAppAPIKey;
+    my $url        = MT->config->PicAppServerURL;
     my $cache_path = MT->config->PicAppCachePath;
 
     my $cache;
@@ -147,10 +155,9 @@ sub asset_options {
     my $blog = $app->blog;
     my $id = $q->param('selected');
 
-    my $plugin = MT->component('PicApp');
-    my $apikey = $plugin->get_config_value('picapp_api_key','blog:'.$app->blog->id);
-
-    my $url = MT->config->PicAppServerURL;
+    my $plugin     = MT->component('PicApp');
+    my $apikey     = MT->config->PicAppAPIKey;
+    my $url        = MT->config->PicAppServerURL;
     my $cache_path = MT->config->PicAppCachePath;
 
     my $cache;

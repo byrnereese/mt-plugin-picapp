@@ -35,7 +35,6 @@ sub class_label { MT->translate('PicApp Image'); }
 sub class_label_plural { MT->translate('PicApp Images'); }
 sub file_name { my $asset   = shift; return $asset->original_title; }
 sub file_path { my $asset   = shift; return undef; }
-sub on_upload { my $asset   = shift; my ($param) = @_; 1; }
 sub has_thumbnail { 1; }
 
 sub thumbnail_url {
@@ -69,7 +68,7 @@ sub as_html {
         url => $url,
     });
     my $response = $picapp->publish($asset->external_id, $app->param('keywords'), $app->user->email, { 
-        size => ($width == 234 ? 1 : ($width == 350 ? 2 : 3))
+        size => ($width == 234 ? 1 : ($width == 380 ? 2 : 3))
     });
 
     if ($response->is_error) {
@@ -96,15 +95,32 @@ sub as_html {
         }
     }
 
+#    $response->{image_tag} =~ s/<script.*<\/script>//gm;
+
     my $text = sprintf(
         '<div class="picapp-image" %s>%s</div>',
         $wrap_style,
         $response->image_tag
         );
 
-    print STDERR "enclose? " . ($param->{enclose} ? "yes" : "no") . "\n";
     return $param->{enclose} ? $asset->enclose($text) : $text;
 }
+
+sub on_upload { 
+    my $asset = shift;
+    my ($param) = @_;
+
+    $asset->SUPER::on_upload(@_);
+
+    return unless $param->{new_entry};
+
+    my $app = MT->instance;
+    MT->log('In Asset::PicApp on_upload');
+    # save in a cookie default settings
+
+    return 1;
+}
+
 
 sub insert_options {
     my $asset = shift;
@@ -114,12 +130,14 @@ sub insert_options {
     my $perms = $app->{perms};
     my $blog  = $asset->blog or return;
 
-    $param->{thumbnail}  = $asset->thumbnail_url;
-    $param->{keywords}   = $app->{query}->param('keywords');
-    $param->{image_id}   = $asset->external_id;
-    $param->{align_left} = 1;
-    $param->{size_large} = 1;
-    $param->{html_head}  = '<link rel="stylesheet" href="'.$app->static_path.'plugins/PicApp/app.css" type="text/css" />';
+    $app->param('is_picapp',1);
+    $param->{thumbnail}   = $asset->thumbnail_url;
+    $param->{keywords}    = $app->{query}->param('keywords');
+    $param->{description} = $asset->description;
+    $param->{image_id}    = $asset->external_id;
+    $param->{align_left}  = 1;
+    $param->{size_large}  = 1;
+    $param->{html_head}   = '<link rel="stylesheet" href="'.$app->static_path.'plugins/PicApp/app.css" type="text/css" />';
 
     return $app->build_page( '../plugins/PicApp/tmpl/dialog/asset_options.tmpl', $param );
 }
