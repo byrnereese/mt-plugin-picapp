@@ -147,6 +147,7 @@ sub search {
         open FILE, ">/Users/breese/Sites/logs/picapp.xml";
         print FILE $content;
         close FILE;
+        $content =~ s/'//gm; # Major HACK, but apparently in some versions of XML::Simple, the single quote messes everything up
         my $xml = eval { XMLin($content) };
         if ($@) {
             print STDERR "XML PARSING ERROR: $@\n";

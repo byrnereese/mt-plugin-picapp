@@ -1,7 +1,10 @@
 id: PicApp
 name: 'PicApp'
 description: 'A plugin that provides integration with the PicApp image distribution platform.'
-version: 0.9.2
+author_link: http://endevver.com/
+author_name: Endevver, LLC
+plugin_link: http://endevver.com/plugins/picapp/
+version: 0.9.3
 schema_version: 1.2
 
 object_types:

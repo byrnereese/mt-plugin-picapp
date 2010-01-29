@@ -2,40 +2,40 @@
   background-image: url('picapp-icon.gif');
 }
 
-#keywords-field {
+.dialog #keywords-field {
   float: left;
   width: 205px;
   margin-right: 20px;
 }
-  #keywords-field .field-content input {
+  .dialog #keywords-field .field-content input {
     width: 205px;
   }
-#category-field {
+.dialog #category-field {
   float: left;
   width: 170px;
 }
-  #category-field .field-content label {
+  .dialog #category-field .field-content label {
     float: left;
     width: 70px;
     margin-right: 10px;
     margin-top: 5px;
   }
-  #category-field .field-content input {
+  .dialog #category-field .field-content input {
     float: left;
     margin-right: 5px;
   }
-#subcategory-field {
+.dialog #subcategory-field {
   float: left;
   width: 100px;
 }
-  #subcategory-field .field-content input {
+  .dialog #subcategory-field .field-content input {
     width: 100px;
   }
 
-#search-box {
+.dialog #search-box {
   position: relative;
 }
-#search-box button {
+.dialog #search-box button {
   position: absolute;
   right: 0; bottom: 10px;
   display: block;
@@ -50,7 +50,6 @@
   cursor: pointer;
   padding: 2px 10px 4px;
 }
-
 
 #pages {
   float: left;
