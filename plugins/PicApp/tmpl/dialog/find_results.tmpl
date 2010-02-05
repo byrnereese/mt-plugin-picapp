@@ -83,6 +83,7 @@
           },
         error: function(xhr,status,error) {
             alert('PicApp Plugin: our apologies, but it appears that something went wrong: ' + error);
+            $('.picapp-search-results ul').html('<div id="progress"><img src="<$mt:StaticWebPath$>plugins/PicApp/warning.png" /></div>');
           }
       });
     }

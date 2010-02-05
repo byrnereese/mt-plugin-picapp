@@ -5,7 +5,7 @@
         label="<__trans phrase="Keywords">"
         hint="Enter the keywords with which to search PicApp"
         show_hint="0">
-      <input name="kw" type="text" size="60" value="<$mt:var name="keywords"$>" />
+      <input name="kw" type="text" size="60" value="<$mt:var name="keywords" regex_replace="/^\*$/",""$>" />
     </mtapp:setting>
 
     <mtapp:setting
