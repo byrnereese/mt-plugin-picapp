@@ -67,7 +67,7 @@ sub find_results {
     if ($q->param('kw')) {
         $keywords    = $q->param('kw');
         $category    = $q->param('category') || 'Editorial';
-        $subcategory = $q->param('subcategory');
+        $subcategory = $q->param('subcategory') || '';
     } else {
         my $c = $app->cookie_val('mt_picapp') || '';
         ($keywords,$category,$subcategory) = ($c =~ /^kw=([^\&]*)&c=([^\&]*)&s=(.*)$/) if $c;
@@ -115,7 +115,12 @@ sub find_results {
         total_records => 20,
         page => $page
     });
-
+    if (MT->config->DebugMode > 0) {
+        MT->log({
+            blog_id => $app->blog->id,
+            message => "Querying PicApp with the following URL: " . $response->url_queried
+                });
+    }
     if ($response->is_error) {
         MT->log({
             blog_id => $app->blog->id,
