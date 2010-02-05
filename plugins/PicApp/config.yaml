@@ -4,7 +4,7 @@ description: 'A plugin that provides integration with the PicApp image distribut
 author_link: http://endevver.com/
 author_name: Endevver, LLC
 plugin_link: http://endevver.com/plugins/picapp/
-version: 0.9.4
+version: 0.9.5
 schema_version: 1.2
 
 object_types:
@@ -35,4 +35,4 @@ callbacks:
   MT::App::CMS::template_source.archetype_editor: $PicApp::PicApp::Plugin::xfrm_editor
   MT::App::CMS::template_source.edit_entry:       $PicApp::PicApp::Plugin::xfrm_edit
   MT::App::CMS::template_source.asset_options:    $PicApp::PicApp::Plugin::xfrm_asset_options
-
+  MT::Entry::pre_save:                            $PicApp::PicApp::Plugin::pre_save

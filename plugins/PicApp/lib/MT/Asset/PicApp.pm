@@ -60,7 +60,7 @@ sub as_html {
 
     require Net::PicApp;
     my $plugin = MT->component('PicApp');
-    my $apikey = $plugin->get_config_value('picapp_api_key','blog:'.$asset->blog_id);
+    my $apikey = MT->config->PicAppAPIKey;
     my $url = MT->config->PicAppServerURL;
 
     my $picapp = Net::PicApp->new({
@@ -95,27 +95,23 @@ sub as_html {
         }
     }
 
-#    $response->{image_tag} =~ s/<script.*<\/script>//gm;
+    $response->{image_tag} =~ s/<script.*<\/script>//gm;
 
     my $text = sprintf(
-        '<div class="picapp-image" %s>%s</div>',
+        '<div class="picapp-image" %s>%s<!--PICAPPSCRIPTTAG--></div>',
         $wrap_style,
         $response->image_tag
         );
-
     return $param->{enclose} ? $asset->enclose($text) : $text;
 }
 
 sub on_upload { 
     my $asset = shift;
     my ($param) = @_;
-
-    $asset->SUPER::on_upload(@_);
-
+#    $asset->SUPER::on_upload(@_);
     return unless $param->{new_entry};
 
     my $app = MT->instance;
-    MT->log('In Asset::PicApp on_upload');
     # save in a cookie default settings
 
     return 1;
