@@ -25,8 +25,8 @@ sub pre_save {
     my $app = MT::App->instance;
     my $ref = ref $app;
     if ($ref eq "MT::App::CMS" && $app->mode eq 'save_entry') {
-        $obj->{column_values}->{text} =~ s{<!--PICAPPSCRIPTTAG-->}{<script type="text/javascript" src="http://cdn.pis.picapp.com/IamProd/PicAppPIS/JavaScript/PisV4.js"></script>}g;
-        $obj->{column_values}->{text_more} =~ s{<!--PICAPPSCRIPTTAG-->}{<script type="text/javascript" src="http://cdn.pis.picapp.com/IamProd/PicAppPIS/JavaScript/PisV4.js"></script>}g;
+        $obj->{column_values}->{text} =~ s{<!--PICAPPSCRIPTTAG-->}{<script type="text/javascript" src="http://cdn.pis.picapp.com/IamProd/PicAppPIS/JavaScript/PisV4.js"></script>}gm;
+        $obj->{column_values}->{text_more} =~ s{<!--PICAPPSCRIPTTAG-->}{<script type="text/javascript" src="http://cdn.pis.picapp.com/IamProd/PicAppPIS/JavaScript/PisV4.js"></script>}gm;
     }
 }
 
