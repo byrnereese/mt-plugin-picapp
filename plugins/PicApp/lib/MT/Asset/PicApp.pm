@@ -94,14 +94,18 @@ sub as_html {
             $wrap_style .= q{style="text-align: center; display: block; margin: 0 auto 20px;"};
         }
     }
-
+    my $text;
     $response->{image_tag} =~ s/<script.*<\/script>//gm;
-
-    my $text = sprintf(
-        '<div class="picapp-image" %s>%s<!--PICAPPSCRIPTTAG--></div>',
+    $text = sprintf(
+        '<div class="picapp-image" %s>%s<!--//PICAPPSCRIPTTAG--></div>',
         $wrap_style,
         $response->image_tag
         );
+#    $text = sprintf(
+#        '<div class="picapp-image" %s>%s</div>',
+#        $wrap_style,
+#        $response->image_tag
+#        );
     return $param->{enclose} ? $asset->enclose($text) : $text;
 }
 
