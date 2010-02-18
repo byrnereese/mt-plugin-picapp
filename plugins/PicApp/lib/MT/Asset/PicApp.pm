@@ -97,7 +97,8 @@ sub as_html {
     my $text;
     $response->{image_tag} =~ s/<script.*<\/script>//gm;
     $text = sprintf(
-        '<div class="picapp-image" %s>%s<!--//PICAPPSCRIPTTAG--></div>',
+#        '<div class="picapp-image" %s>%s<--PICAPPSCRIPTTAG--></div>',
+        '<div class="picapp-image" %s>%s</div>',
         $wrap_style,
         $response->image_tag
         );
