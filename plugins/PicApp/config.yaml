@@ -4,7 +4,7 @@ description: 'A plugin that provides integration with the PicApp image distribut
 author_link: http://endevver.com/
 author_name: Endevver, LLC
 plugin_link: http://endevver.com/plugins/picapp/
-version: 0.9.8
+version: 0.9.9
 schema_version: 1.2
 
 object_types:
