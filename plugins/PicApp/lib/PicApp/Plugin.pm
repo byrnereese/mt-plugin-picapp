@@ -35,7 +35,7 @@ sub xfrm_edit {
     my ($cb, $app, $tmpl) = @_;
     return 1 unless uses_picapp();
     my $slug1 = <<END_TMPL;
-<link rel="stylesheet" href="<mt:StaticWebPath>plugins/PicApp/app.css" type="text/css" />
+<link rel="stylesheet" href="<mt:PluginStaticWebPath component="PicApp">app.css" type="text/css" />
 END_TMPL
     $$tmpl =~ s{(<mt:setvarblock name="html_head" append="1">)}{$1$slug1}msg;
 }

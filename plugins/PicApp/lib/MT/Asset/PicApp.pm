@@ -3,6 +3,7 @@ package MT::Asset::PicApp;
 use MT::Util qw( encode_html );
 use strict;
 use base qw( MT::Asset );
+use ConfigAssistant::Util qw( plugin_static_web_path );
 
 __PACKAGE__->install_properties( { class_type => 'picapp', } );
 __PACKAGE__->install_meta( { columns => [ 
@@ -128,17 +129,18 @@ sub insert_options {
     my ($param) = @_;
 
     my $app   = MT->instance;
+    my $q     = $app->can('query') ? $app->query : $app->param;
     my $perms = $app->{perms};
     my $blog  = $asset->blog or return;
 
     $app->param('is_picapp',1);
     $param->{thumbnail}   = $asset->thumbnail_url;
-    $param->{keywords}    = $app->{query}->param('keywords');
+    $param->{keywords}    = $q->param('keywords');
     $param->{description} = $asset->description;
     $param->{image_id}    = $asset->external_id;
     $param->{align_left}  = 1;
     $param->{size_large}  = 1;
-    $param->{html_head}   = '<link rel="stylesheet" href="'.$app->static_path.'plugins/PicApp/app.css" type="text/css" />';
+    $param->{html_head}   = '<link rel="stylesheet" href="'.plugin_static_web_path('PicApp').'app.css" type="text/css" />';
 
     return $app->build_page( '../plugins/PicApp/tmpl/dialog/asset_options.tmpl', $param );
 }
