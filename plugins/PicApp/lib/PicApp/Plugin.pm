@@ -61,7 +61,7 @@ sub xfrm_asset_options {
 sub find_results {
     my $app = shift;
 
-    my $q = $app->{query};
+    my $q = $app->can('query') ? $app->query : $app->param;
     my $blog = $app->blog;
 
     my ($keywords,$category,$subcategory);
@@ -168,7 +168,7 @@ sub find_results {
 
 sub asset_options {
     my $app = shift;
-    my $q = $app->{query};
+    my $q = $app->can('query') ? $app->query : $app->param;
     my $blog = $app->blog;
     my $id = $q->param('selected');
 
@@ -236,7 +236,7 @@ sub asset_options {
         asset       => $asset,
         description => $asset->description,
         thumbnail   => $asset->thumbnail_url,
-        keywords    => $app->{query}->param('keywords'),
+        keywords    => $q->param('keywords'),
         size_large  => 1,
         is_picapp   => 1,
     );
